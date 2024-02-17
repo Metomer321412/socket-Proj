@@ -1,15 +1,23 @@
 #   Ex. 2.7 template - server side
 #   Author: Barak Gonen, 2017
 #   Modified for Python 3, 2020
-
 import socket
 import protocol
-
+import os
+import commands
 
 IP = '0.0.0.0'
 PORT = 1729
 #PHOTO_PATH = ???? # The path + filename where the screenshot at the server should be saved
-
+ALL = {
+        "screenshot": 0,
+        "dir": 1,
+        "delete": 1,
+        "copy": 2,
+        "execute": 1,
+        "exit": 0,
+        "send_screenshot": 0
+}
 
 def check_client_request(cmd):
     """
@@ -28,9 +36,19 @@ def check_client_request(cmd):
     # Then make sure the params are valid
 
     # (6)
-
-    return True, "DIR", ["c:\\cyber"]
-
+    broken = cmd.split(' ')
+    if(broken[0]=='delete' or 'execute' ):
+       if((os.path.isfile(broken[1]))):
+           return True, broken[0],broken[1]
+    if(broken[0]=='dir'):
+        if(os.path.exists(broken[1])):
+            return True, broken[0], broken[1]
+    if(broken[0]=='copy'):
+        copy_split = broken[1].split(',')
+        if((os.path.isfile(copy_split[0])==True) and (os.path.isfile(copy_split[1])==True)):
+            return True, broken[0],copy_split
+    print("false")
+    return False, broken[0],broken[1]
 
 def handle_client_request(command, params):
     """Create the response to the client, given the command is legal and params are OK
@@ -42,18 +60,29 @@ def handle_client_request(command, params):
         response: the requested data
 
     """
-
+    if(command == 'delete'):
+        response = commands.delete(params)
+    if (command == 'dir'):
+        response = commands.dir(params)
+    if (command == 'copy'):
+        response = commands.copy(params[0],params[1])
+    if (command == 'execute'):
+        response = commands.execute(params)
+    if (command == 'screenshot'):
+        response = commands.screenshot()
+    if (command == 'send_screenshot'):
+        response = commands.send_screenshot()
+    if (command == 'exit'):
+        response = commands.exit()
     # (7)
-
-    response = 'OK'
     return response
 
 
 def main():
     # open socket with client
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((IP, PORT))
     server_socket.listen(1)
-
     client_socket, address = server_socket.accept()
     # (1)
 
@@ -67,38 +96,43 @@ def main():
             if valid_cmd:
 
                 # (6)
-
+                msg = handle_client_request(command,params)
                 # prepare a response using "handle_client_request"
-
+                if(command == 'dir'):
+                    msg2 = 'ывффцй'.join(msg)
+                    msg = msg2
+                ready_msg = protocol.create_msg(msg)
                 # add length field using "create_msg"
-
+                client_socket.send(ready_msg.encode())
                 # send to client
 
                 if command == 'SEND_FILE':
+                    wrd =commands.s
                     # Send the data itself to the client
 
                     # (9)
                 
-                if command == 'EXIT':
+                if command == 'exit':
+                    print("Closing connection")
                     client_socket.close()
                     server_socket.close()
-                    break
+
             else:
                 # prepare proper error to client
                 response = 'Bad command or parameters'
                 # send to client
-
+                client_socket.send(response.encode())
         else:
             # prepare proper error to client
             response = 'Packet not according to protocol'
             #send to client
-
+            client_socket.send(response.encode())
             # Attempt to clean garbage from socket
             client_socket.recv(1024)
 
     # close sockets
     print("Closing connection")
+    client_socket.close()
+    server_socket.close()
 
-
-if __name__ == '__main__':
-    main()
+main()
