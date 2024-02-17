@@ -33,8 +33,8 @@ def main():
     # loop until user requested to exit
     while True:
         cmd = input("Please enter command:\n")
-        if protocol_solution.check_cmd(cmd):
-            packet = protocol_solution.create_msg(cmd)
+        if protocol.check_cmd(cmd):
+            packet = protocol.create_msg(cmd)
             my_socket.send(packet)
             handle_server_response(my_socket, cmd)
             if cmd == 'EXIT':
