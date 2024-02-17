@@ -45,7 +45,7 @@ def check_client_request(cmd):
             return True, broken[0], broken[1]
     if(broken[0]=='copy'):
         copy_split = broken[1].split(',')
-        if((os.path.isfile(copy_split[0])==True) and (os.path.isfile(copy_split[1])==True)):
+        if((os.path.isfile(copy_split[0])==True) and (os.path.exists(copy_split[1])==True)):
             return True, broken[0],copy_split
     print("false")
     return False, broken[0],broken[1]
