@@ -44,7 +44,7 @@ def get_msg(my_socket):
     Extract message from protocol, without the length field
     If length field does not include a number, returns False, "Error"
     """
-    print("waiting for msg")
+    print("Got msg")
     length = my_socket.recv(10).decode()
     if(length.isdigit()):
         msg = my_socket.recv(int(length)).decode()

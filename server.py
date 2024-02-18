@@ -37,11 +37,15 @@ def check_client_request(cmd):
 
     # (6)
     broken = cmd.split(' ')
+    print(broken)
+    print(broken[0])
     if(broken[0]=='delete' or 'execute' ):
-       if((os.path.isfile(broken[1]))):
-           return True, broken[0],broken[1]
+        print((os.path.isfile(broken[1])))
+        if((os.path.isfile(broken[1]))):
+            return True, broken[0],broken[1]
     if(broken[0]=='dir'):
         if(os.path.exists(broken[1])):
+            print(broken)
             return True, broken[0], broken[1]
     if(broken[0]=='copy'):
         copy_split = broken[1].split(',')
@@ -60,10 +64,12 @@ def handle_client_request(command, params):
         response: the requested data
 
     """
-    if(command == 'delete'):
+    if (command == 'delete'):
         response = commands.delete(params)
     if (command == 'dir'):
+        print("inside2")
         response = commands.dir(params)
+        print(response)
     if (command == 'copy'):
         response = commands.copy(params[0],params[1])
     if (command == 'execute'):
@@ -96,12 +102,15 @@ def main():
             if valid_cmd:
 
                 # (6)
-                msg = handle_client_request(command,params)
+                msgold = handle_client_request(command,params)
                 # prepare a response using "handle_client_request"
                 if(command == 'dir'):
-                    msg2 = 'ывффцй'.join(msg)
+                    msg2 = '" "'.join(msgold)
                     msg = msg2
-                ready_msg = protocol.create_msg(msg)
+                    print("msg:  " + msg  )
+                    ready_msg = protocol.create_msg(msg)
+                if(command == 'delete'):
+                    ready_msg = protocol.create_msg(msgold)
                 # add length field using "create_msg"
                 client_socket.send(ready_msg.encode())
                 # send to client
@@ -116,7 +125,6 @@ def main():
                     print("Closing connection")
                     client_socket.close()
                     server_socket.close()
-
             else:
                 # prepare proper error to client
                 response = 'Bad command or parameters'

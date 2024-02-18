@@ -16,13 +16,18 @@ def handle_server_response(my_socket, cmd):
     For example, DIR should result in printing the contents to the screen,
     Note- special attention should be given to SEND_PHOTO as it requires and extra receive
     """
+    print("cmd")
+    print(cmd)
     save = cmd.split(' ')
+    print(save)
     if(save[0] == 'dir'):
         fixed = protocol.get_msg(my_socket)
-        list = fixed[1].split('ывффцй')
+        print(fixed)
+        list = fixed[1].split('" "')
         print(list)
      # (8) treat all responses except SEND_PHOTO
     elif(save[0]!='send_screenshot' or 'dir'):
+        print("inside")
         fixed = protocol.get_msg(my_socket)
         print(fixed[1])
     # (10) treat SEND_PHOTO
@@ -44,6 +49,7 @@ def main():
         cmd = input("Please enter command:\n")
         if protocol.check_cmd(cmd):
             packet = protocol.create_msg(cmd)
+            print(packet + " packet")
             my_socket.send(packet.encode())
             handle_server_response(my_socket, cmd)
             if cmd == 'EXIT':
