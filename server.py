@@ -39,6 +39,8 @@ def check_client_request(cmd):
     broken = cmd.split(' ')
     print(broken)
     print(broken[0])
+    if(broken[0]=='screenshot'):
+        return True,broken[0]
     if(broken[0]=='delete' or 'execute' ):
         print((os.path.isfile(broken[1])))
         if((os.path.isfile(broken[1]))):
@@ -49,6 +51,7 @@ def check_client_request(cmd):
             return True, broken[0], broken[1]
     if(broken[0]=='copy'):
         copy_split = broken[1].split(',')
+        print((os.path.isfile(copy_split[0])==True) and (os.path.exists(copy_split[1])==True))
         if((os.path.isfile(copy_split[0])==True) and (os.path.exists(copy_split[1])==True)):
             return True, broken[0],copy_split
     print("false")
@@ -98,38 +101,46 @@ def main():
         valid_protocol, cmd = protocol.get_msg(client_socket)
         if valid_protocol:
             # Check if params are good, e.g. correct number of params, file name exists
-            valid_cmd, command, params = check_client_request(cmd)
-            if valid_cmd:
-
-                # (6)
-                msgold = handle_client_request(command,params)
-                # prepare a response using "handle_client_request"
-                if(command == 'dir'):
-                    msg2 = '" "'.join(msgold)
-                    msg = msg2
-                    print("msg:  " + msg  )
-                    ready_msg = protocol.create_msg(msg)
-                if(command == 'delete'):
-                    ready_msg = protocol.create_msg(msgold)
-                # add length field using "create_msg"
+            print(cmd)
+            if(cmd== 'screenshot'):
+                msg = handle_client_request(cmd,' ')
+                ready_msg = protocol.create_msg(msg)
                 client_socket.send(ready_msg.encode())
-                # send to client
-
-                if command == 'SEND_FILE':
-                    wrd =commands.s
-                    # Send the data itself to the client
-
-                    # (9)
-                
-                if command == 'exit':
-                    print("Closing connection")
-                    client_socket.close()
-                    server_socket.close()
+            elif(cmd == 'send_screenshot'):
+                msg = handle_client_request(cmd, ' ')
+                ready_msg = protocol.create_msg(msg)
+                client_socket.send(ready_msg.encode())
             else:
-                # prepare proper error to client
-                response = 'Bad command or parameters'
-                # send to client
-                client_socket.send(response.encode())
+                valid_cmd, command, params = check_client_request(cmd)
+                if valid_cmd:
+
+                    # (6)
+                    msgold = handle_client_request(command,params)
+                    # prepare a response using "handle_client_request"
+
+                    if(command == 'dir'):
+                        msg2 = '" "'.join(msgold)
+                        msg = msg2
+                        print("msg:  " + msg  )
+                        ready_msg = protocol.create_msg(msg)
+                    elif(command == 'delete' or 'execute' or 'screenshot'):
+                        ready_msg = protocol.create_msg(msgold)
+                    # add length field using "create_msg"
+                    client_socket.send(ready_msg.encode())
+                    # send to client
+                        # Send the data itself to the client
+
+                        # (9)
+
+                    if command == 'exit':
+                        print("Closing connection")
+                        client_socket.close()
+                        server_socket.close()
+                else:
+                    # prepare proper error to client
+                    response = 'Bad command or parameters'
+                    # send to client
+                    client_socket.send(response.encode())
         else:
             # prepare proper error to client
             response = 'Packet not according to protocol'

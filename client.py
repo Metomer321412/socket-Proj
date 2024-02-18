@@ -47,7 +47,7 @@ def main():
     cmd =""
     while True:
         cmd = input("Please enter command:\n")
-        if protocol.check_cmd(cmd):
+        if  protocol.check_cmd(cmd):
             packet = protocol.create_msg(cmd)
             print(packet + " packet")
             my_socket.send(packet.encode())

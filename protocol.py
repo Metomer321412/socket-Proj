@@ -15,7 +15,7 @@ def check_cmd(data):
         "screenshot": 0,
         "dir": 1,
         "delete": 1,
-        "copy": 2,
+        "copy": 1,
         "execute": 1,
         "exit": 0,
         "send_screenshot": 0
